@@ -39,7 +39,7 @@ unsafeWindow.SDK_INITIALIZED.then(() => {
         scriptName: "WME Color Speeds",
     });
     console.log(`SDK v ${sdk.getSDKVersion()} on ${sdk.getWMEVersion()} initialized`);
-    Promise.all([sdk.Events.once({ eventName: "wme-ready" })]).then(colorSpeeds);
+    sdk.Events.once({ eventName: "wme-ready" }).then(colorSpeeds);
 });
 function colorSpeeds() {
     const scriptName = GM_info.script.name;
@@ -1219,12 +1219,6 @@ const dashStyles = [
     // *************
     function bootstrap() {
         loadStartTime = performance.now();
-        if (!WazeWrap.Ready) {
-            setTimeout(() => {
-                bootstrap();
-            }, 100);
-            return;
-        }
         init();
     }
     function showScriptInfoAlert() {
@@ -1328,13 +1322,22 @@ const dashStyles = [
             visibility: WMECSpeeds.visibility ?? false,
         });
         // reload after changing WME units
-        W.prefs.on("change:isImperial", () => {
-            destroyTab();
-            eventUnRegister();
-            checkUnit();
-            createToggler();
-            createCSS();
+        sdk.Events.on({
+            eventName: "wme-user-settings-changed",
+            eventHandler: () => {
+                destroyTab();
+                eventUnRegister();
+                checkUnit();
+                createCSS();
+            }
         });
+        // W.prefs.on("change:isImperial", () => {
+        //     destroyTab();
+        //     eventUnRegister();
+        //     checkUnit();
+        //     createToggler();
+        //     createCSS();
+        // });
         // log('colorspeeds_mapLayer ',colorspeeds_mapLayer);
         // Then running
         createCSS();
