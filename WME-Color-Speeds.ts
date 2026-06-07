@@ -1720,7 +1720,7 @@ const dashStyles = [
         // $(tabPane).parent().css({ width: 'auto', padding: '4px' });
 
         // await W.userscripts.waitForElementConnected(tabPane);
-        sdk.Sidebar.registerScriptTab().then((r) => {
+        sdk.Sidebar.registerScriptTab().then((r: RegisterSidebarTabResult) => {
             r.tabLabel.innerHTML = labelText;
             r.tabPane.innerHTML = $tabPane.html;
 

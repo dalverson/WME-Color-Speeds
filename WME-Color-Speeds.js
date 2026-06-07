@@ -21,6 +21,7 @@
 // @author           Created by French Script Team, Maintained by WazeDev
 // @copyright        Sebiseba, seb-d59 & DummyD2 - 2015-2019
 // ==/UserScript==
+// import { RegisterSidebarTabResult } from "wme-sdk-typings";
 /* global W */
 /* global WazeWrap */
 // *********************
