@@ -21,7 +21,6 @@
 // @author           Created by French Script Team, Maintained by WazeDev
 // @copyright        Sebiseba, seb-d59 & DummyD2 - 2015-2019
 // ==/UserScript==
-// import { RegisterSidebarTabResult } from "wme-sdk-typings";
 /* global W */
 /* global WazeWrap */
 // *********************
@@ -648,10 +647,10 @@ const dashStyles = [
                 .replace(")", "")
                 .split(",")
                 .map((val) => val.trim());
-            if (arr.length === 3 && arr.every((val) => !isNaN(val))) {
+            if (arr.length === 3 && arr.every((val) => !Number.isNaN(Number(val)))) {
                 const colorrgbs = getColorArr("rgbs");
                 const colornames = getColorArr("names");
-                const matchIndex = colorrgbs.findIndex((color) => JSON.stringify(arr) === JSON.stringify(color));
+                const matchIndex = colorrgbs?.findIndex((color) => JSON.stringify(arr) === JSON.stringify(color));
                 if (matchIndex !== -1) {
                     return {
                         r: Number.parseInt(arr[0]),
@@ -665,7 +664,7 @@ const dashStyles = [
         }
         else {
             let colornames = getColorArr("names");
-            const matchIndex = colornames.findIndex((name) => c === name.toLowerCase());
+            const matchIndex = colornames?.findIndex((name) => c === name.toLowerCase());
             if (matchIndex !== -1) {
                 const colorrgbs = getColorArr("rgbs");
                 if (debug)
@@ -1323,15 +1322,6 @@ const dashStyles = [
             visibility: WMECSpeeds.visibility ?? false,
         });
         // reload after changing WME units
-        sdk.Events.on({
-            eventName: "wme-user-settings-changed",
-            eventHandler: () => {
-                destroyTab();
-                eventUnRegister();
-                checkUnit();
-                createCSS();
-            }
-        });
         // W.prefs.on("change:isImperial", () => {
         //     destroyTab();
         //     eventUnRegister();
@@ -1702,6 +1692,10 @@ const dashStyles = [
             eventName: "wme-map-data-loaded",
             eventHandler: SCColor,
         });
+        sdk.Events.on({
+            eventName: "wme-user-settings-changed",
+            eventHandler: userSettingsChanged,
+        });
         unsafeWindow.addEventListener("beforeunload", saveOption, false);
     }
     function eventUnRegister() {
@@ -1734,6 +1728,10 @@ const dashStyles = [
         sdk.Events.off({
             eventName: "wme-map-data-loaded",
             eventHandler: SCColor,
+        });
+        sdk.Events.off({
+            eventName: "wme-user-settings-changed",
+            eventHandler: userSettingsChanged,
         });
         unsafeWindow.removeEventListener("beforeunload", saveOption, false);
     }
@@ -2411,6 +2409,12 @@ const dashStyles = [
             points.push([newpos.lon, newpos.lat]);
         }
         return points;
+    }
+    function userSettingsChanged() {
+        destroyTab();
+        eventUnRegister();
+        checkUnit();
+        createCSS();
     }
     function SCColor() {
         //log('SCColor');
