@@ -2,7 +2,7 @@
 // ==UserScript==
 // @name             WME Color Speeds
 // @name:fr          WME Color Speeds
-// @version          2026.06.09.001
+// @version          2026.06.16.001
 // @description      Adds colors to road segments to show their speed
 // @description:fr   Colorisation des segments selon leurs vitesses.
 // @include          https://www.waze.com/editor*
@@ -83,8 +83,9 @@ function colorSpeeds() {
 
     const scriptName = GM_info.script.name;
     const currentVersion = GM_info.script.version;
-    const changelogFrench = "UPDATED: Converted Script to SDK.<br><br>TODO: ";
-    const changelogEnglish = "UPDATED: Converted Script to SDK.<br><br>TODO: ";
+    const storageKey = "WMEColorSpeeds"
+    const changelogFrench = "UPDATED: Fixed settings save.<br><br>TODO: ";
+    const changelogEnglish = "UPDATED: Fixed settings save.<br><br>TODO: ";
     const greasyForkUrl = GM_info.script.namespace;
     const downloadUrl = "https://greasyfork.org/scripts/14044-wme-color-speeds/code/wme-color-speeds.user.js";
     const forumUrl = "https://www.waze.com/discuss/t/script-wme-color-speeds-v1-2-6/179401";
@@ -1269,6 +1270,7 @@ const dashStyles = [
             eventHandler: (payload) => {
                 WMECSpeeds.visibility = payload.checked;
                 sdk.Map.setLayerVisibility({ layerName: payload.name, visibility: payload.checked });
+                saveOption();
             },
         });
     }
@@ -1287,7 +1289,7 @@ const dashStyles = [
     }
 
     function saveOption() {
-        localStorage.setItem(sdk.getScriptName(), JSON.stringify(WMECSpeeds));
+        localStorage.setItem(storageKey, JSON.stringify(WMECSpeeds));
     }
     function destroyTab() {
         // W.userscripts.removeSidebarTab("ColorSpeeds");
@@ -1342,7 +1344,7 @@ const dashStyles = [
             if (debug) {
                 console.error("WME ColorSpeeds - CSpeedsCountries.top.name DOM : NOK");
             }
-            unsafeWindow.setTimeout(init, 500);
+            setTimeout(init, 500);
             return;
         }
         CSpeedI18n = sdk.Settings.getLocale().localeCode;
@@ -1355,8 +1357,8 @@ const dashStyles = [
         }
 
         // Verify localStorage. Init if empty or not correct
-        if (localStorage.WMEColorSpeeds !== undefined && IsJsonString(localStorage?.getItem("WMEColorSpeeds"))) {
-            WMECSpeeds = JSON.parse(localStorage.WMEColorSpeeds);
+        if (localStorage[storageKey] !== undefined && IsJsonString(localStorage?.getItem(storageKey))) {
+            WMECSpeeds = JSON.parse(localStorage[storageKey]);
             if (WMECSpeeds.speedColors === undefined)
                 WMECSpeeds.speedColors = {
                     kmh: {},
@@ -1373,14 +1375,18 @@ const dashStyles = [
             if (WMECSpeeds.offsetValue === undefined) WMECSpeeds.offsetValue = offsetValue;
             if (WMECSpeeds.opacityValue === undefined) WMECSpeeds.opacityValue = opacityValue;
             if (WMECSpeeds.thicknessValue === undefined) WMECSpeeds.thicknessValue = thicknessValue;
-            WMECSpeeds.typeOfRoad = structuredClone(typeOfRoad);
+            for (const key in typeOfRoad) {
+                if (WMECSpeeds.typeOfRoad.hasOwnProperty(key) === false ) {
+                    WMECSpeeds.typeOfRoad[key] = structuredClone(typeOfRoad[key]);
+                }
+            }
             if (WMECSpeeds.togglerChecked === undefined) WMECSpeeds.togglerChecked = WMECSpeeds.visibility;
             WMECSpeeds.multiplePalette = CSCountry?.name === "United States" ? WMECSpeeds.multiplePalette : false;
 
             log("Init ok", null);
             log("WMECSpeeds = ", WMECSpeeds);
         } else {
-            localStorage.setItem("WMEColorSpeeds", JSON.stringify(WMECSpeeds));
+            localStorage.setItem(storageKey, JSON.stringify(WMECSpeeds));
             setTimeout(init, 500);
             return;
         }
@@ -1961,6 +1967,7 @@ const dashStyles = [
 
             $(`#cbRoad${type}`).on("click", () => {
                 SCColor();
+                saveOption();
             });
         }
     }
@@ -2217,6 +2224,7 @@ const dashStyles = [
             $("CSroadType").html("");
             setupPanel();
             SCColor();
+            saveOption();
         });
         $("#selectCountry").off().on("change", () => {
             $("#CStable").html("");
@@ -2224,6 +2232,7 @@ const dashStyles = [
             updateCountriesList();
             _setupRoadTypes();
             setupPanel();
+            saveOption();
         });
 
         $("#cbMultiplePalette").off().on("click", function () {
@@ -2240,6 +2249,7 @@ const dashStyles = [
             _setupRoadTypes();
             setupHandlers();
             SCColor();
+            saveOption();
         });
 
         $("#selectState").off().on("change", () => {
@@ -2249,6 +2259,7 @@ const dashStyles = [
             _setupRoadTypes();
             setupHandlers();
             SCColor();
+            saveOption();
         });
 
         $("#edit_others").off().on("click", () => {
@@ -2302,6 +2313,7 @@ const dashStyles = [
             _setupRoadTypes();
             setupHandlers();
             SCColor();
+            saveOption();
         });
 
         $("#ConfColor.dropdown-toggle").dropdown();
@@ -2328,16 +2340,19 @@ const dashStyles = [
             WMECSpeeds.offsetValue = event.target.value;
             $("#valOffset").val(event.target.value);
             SCColor();
+            saveOption();
         });
         $("#sliderOpacity").off().on("change", (event) => {
             WMECSpeeds.opacityValue = Number(event.target.value / 100).toFixed(2);
             $("#valOpacity").val(event.target.value);
             SCColor();
+            saveOption();
         });
         $("#sliderThickness").off().on("change", (event) => {
             WMECSpeeds.thicknessValue = event.target.value;
             $("#valThickness").val(event.target.value);
             SCColor();
+            saveOption();
         });
 
         $("#valRed").off().on("input", function() {
@@ -2502,6 +2517,7 @@ const dashStyles = [
             _setupRoadTypes();
             setupPanel();
             setupHandlers();
+            saveOption();
         });
         $("#cancelZoom").on("click", () => {
             $("#editzoom").css("display", "none");
