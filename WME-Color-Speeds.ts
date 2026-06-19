@@ -2,7 +2,7 @@
 // ==UserScript==
 // @name             WME Color Speeds
 // @name:fr          WME Color Speeds
-// @version          2026.06.16.001
+// @version          2026.06.19.001
 // @description      Adds colors to road segments to show their speed
 // @description:fr   Colorisation des segments selon leurs vitesses.
 // @include          https://www.waze.com/editor*
@@ -84,8 +84,8 @@ function colorSpeeds() {
     const scriptName = GM_info.script.name;
     const currentVersion = GM_info.script.version;
     const storageKey = "WMEColorSpeeds"
-    const changelogFrench = "UPDATED: Fixed settings save.<br><br>TODO: ";
-    const changelogEnglish = "UPDATED: Fixed settings save.<br><br>TODO: ";
+    const changelogFrench = "UPDATED: Fix wrong side of road.<br><br>TODO: ";
+    const changelogEnglish = "UPDATED: Fix wrong side of road.<br><br>TODO: ";
     const greasyForkUrl = GM_info.script.namespace;
     const downloadUrl = "https://greasyfork.org/scripts/14044-wme-color-speeds/code/wme-color-speeds.user.js";
     const forumUrl = "https://www.waze.com/discuss/t/script-wme-color-speeds-v1-2-6/179401";
@@ -2533,7 +2533,7 @@ const dashStyles = [
 
     function shiftGeometry(d: number, line: GeoJSON.Position[], trigo: boolean) {
         // d=distance to shift, line=collection of OL points, trigo=boolean: true=left(trigo=CCW) false=right(CW) : fwd is CW, rev is trigo
-        if (!trigo) d = -d;
+        if (trigo) d = -d;
 
         function getOrthoVector(p1: Pixel, p2: Pixel) {
             return [p1.y - p2.y, p2.x - p1.x];
